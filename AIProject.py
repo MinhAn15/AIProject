@@ -11,9 +11,9 @@ from sklearn.linear_model import LinearRegression
 # ========================
 # Truy cập thông tin từ Streamlit Secrets
 try:
-    GITHUB_USERNAME = st.secrets["github"]["username"]  # MinhAn15
-    GITHUB_REPO = st.secrets["github"]["repo"]  # AIProject
-    MODEL_GITHUB_URL = st.secrets["github"]["model_url"]  # https://raw.githubusercontent.com/MinhAn15/AIProject/main/airfoil_model.joblib
+    GITHUB_USERNAME = st.secrets["github"]["username"] 
+    GITHUB_REPO = st.secrets["github"]["repo"] 
+    MODEL_GITHUB_URL = st.secrets["github"]["model_url"]  
 except KeyError as e:
     st.error(f"Thiếu thông tin cấu hình trong Streamlit Secrets: {e}")
     st.stop()
@@ -31,6 +31,7 @@ def set_custom_style():
         .result-container {background-color: #fff; border-radius: 10px; padding: 1.5rem; margin-top: 1.5rem; box-shadow: 0 2px 8px rgba(30, 60, 90, 0.08); text-align: center;}
         .stButton>button {background-color: #1976d2; color: white; border-radius: 25px; font-size: 1.1em; font-weight: 500; padding: 0.5rem 1.5rem;}
         .stForm {border: 1px solid #e0e0e0; border-radius: 8px; padding: 1rem; background-color: rgba(255, 255, 255, 0.9);}
+        .warning-text {color: #d32f2f !important; font-weight: 500;}
     </style>
     """, unsafe_allow_html=True)
 set_custom_style()
@@ -105,7 +106,9 @@ with st.form("input_form"):
         chord_length = st.number_input("Chiều dài dây cung (m)", min_value=0.01, max_value=1.0, step=0.0001, value=0.3048, format="%.4f")
     with col2:
         angle_of_attack = st.number_input("Góc tấn (degree)", min_value=-10.0, max_value=30.0, step=0.0001, value=0.0, format="%.4f")
-        free_stream_velocity = st.number_input("Vận tốc dòng khí (m/s)", min_value=1.0, max_value=100.0, step=0.1, value=71.3, format="%.1f")
+        free_stream_velocity = st.number_input("Vận tốc dòng khí (m/s)", min_value=1.0, step=0.1, value=71.3, format="%.1f")
+        if free_stream_velocity > 100.0:
+            st.markdown('<p class="warning-text">Giá trị cao bất thường</p>', unsafe_allow_html=True)
     with col3:
         suction_thickness = st.number_input("Độ dày biên dạng (m)", min_value=0.00000001, max_value=0.1, step=0.00000001, value=0.00266337, format="%.8f")
     submitted = st.form_submit_button("Dự đoán SSPL (dB)")
@@ -139,7 +142,8 @@ with st.expander("📖 Thông tin dữ liệu & hướng dẫn"):
     **Lưu ý:**
     - File CSV để train mô hình phải có các cột: Frequency, Angle_of_attack, Chord_length, Free_stream_velocity, Suction_side_displacement_thickness, Scaled_sound_pressure_level.
     - Nếu mô hình không tải được từ GitHub, hãy train lại bằng cách tải lên file CSV.
+    - Nếu vận tốc dòng khí > 100 m/s, sẽ có cảnh báo "Giá trị cao bất thường".
     """)
 
 st.markdown("---")
-st.markdown("<small>Developed by MinhAn15. Data source: NASA airfoil self-noise dataset.</small>", unsafe_allow_html=True)
+st.markdown("<small>Developed by Nhóm 1 - Chuyên đề AI. Data source: NASA airfoil self-noise dataset. URL: https://archive.ics.uci.edu/dataset/291/airfoil+self+noise</small>", unsafe_allow_html=True)
