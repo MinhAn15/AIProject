@@ -4,12 +4,13 @@ import pandas as pd
 import joblib
 import os
 import requests
-from sklearn.linear_model import LinearRegression
+from xgboost import XGBRegressor 
 
 # ========================
 # CONFIG
 # ========================
 # Truy cập thông tin từ Streamlit Secrets
+
 try:
     GITHUB_USERNAME = st.secrets["github"]["username"] 
     GITHUB_REPO = st.secrets["github"]["repo"] 
@@ -18,7 +19,8 @@ except KeyError as e:
     st.error(f"Thiếu thông tin cấu hình trong Streamlit Secrets: {e}")
     st.stop()
 
-MODEL_LOCAL_PATH = "airfoil_model.joblib"
+
+MODEL_LOCAL_PATH = MODEL_GITHUB_URL
 
 st.set_page_config(page_title="Airfoil Self-Noise Prediction", page_icon="🛩️", layout="wide")
 
@@ -36,26 +38,11 @@ def set_custom_style():
     """, unsafe_allow_html=True)
 set_custom_style()
 
-def download_model_from_github():
-    try:
-        r = requests.get(MODEL_GITHUB_URL)
-        if r.status_code == 200:
-            with open(MODEL_LOCAL_PATH, "wb") as f:
-                f.write(r.content)
-            return True
-        else:
-            st.error(f"Không thể tải mô hình từ GitHub. Status code: {r.status_code}")
-            return False
-    except Exception as e:
-        st.error(f"Lỗi khi tải mô hình từ GitHub: {e}")
-        return False
 
 def load_model():
     if os.path.exists(MODEL_LOCAL_PATH):
         return joblib.load(MODEL_LOCAL_PATH)
     else:
-        if download_model_from_github():
-            return joblib.load(MODEL_LOCAL_PATH)
         return None
 
 def train_and_save_model(df):
@@ -63,12 +50,17 @@ def train_and_save_model(df):
     if not all(col in df.columns for col in required_columns):
         st.error(f"File CSV thiếu một hoặc nhiều cột yêu cầu: {required_columns}")
         st.stop()
+
     X = df[['Frequency', 'Angle_of_attack', 'Chord_length', 'Free_stream_velocity', 'Suction_side_displacement_thickness']]
     y = df['Scaled_sound_pressure_level']
-    model = LinearRegression()
+
+    model = XGBRegressor(n_estimators=500, max_depth = 7, learning_rate=0.1, subsample = 0.8,  random_state=42) 
     model.fit(X, y)
+
+    # Save model
     joblib.dump(model, MODEL_LOCAL_PATH)
     return model
+
 
 # ========================
 # MAIN APP
