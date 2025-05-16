@@ -40,9 +40,14 @@ set_custom_style()
 
 
 def load_model():
-    if os.path.exists(MODEL_LOCAL_PATH):
-        return joblib.load(MODEL_LOCAL_PATH)
-    else:
+    try:
+        headers = {"Authorization": f"token {st.secrets['github']['pat']}"}
+        response = requests.get(st.secrets["github"]["model_url"], headers=headers)
+        response.raise_for_status()
+        model = joblib.load(io.BytesIO(response.content))
+        return model
+    except Exception as e:
+        st.error(f"Không tải được mô hình từ GitHub: {e}")
         return None
 
 def train_and_save_model(df):
