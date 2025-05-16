@@ -74,7 +74,7 @@ st.markdown("#### Nhập các thông số bên dưới để dự đoán mức �
 
 # Sidebar
 st.sidebar.header("Cấu hình mô hình")
-retrain = st.sidebar.checkbox("🔄 Train lại mô hình", value=False, help="Tải file CSV để train mô hình mới")
+retrain = st.sidebar.checkbox("🔄 Train lại mô hình (PORTABLE)", value=False, help="Tải file CSV để train mô hình mới")
 
 # Model handling
 model = None
