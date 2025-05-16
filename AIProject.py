@@ -14,13 +14,12 @@ import io
 try:
     GITHUB_USERNAME = st.secrets["github"]["username"] 
     GITHUB_REPO = st.secrets["github"]["repo"] 
-    MODEL_GITHUB_URL = st.secrets["github"]["model_url"]  
+    MODEL_LOCAL_PATH = st.secrets["github"]["model_url"]  
 except KeyError as e:
     st.error(f"Thiếu thông tin cấu hình trong Streamlit Secrets: {e}")
     st.stop()
 
 
-MODEL_LOCAL_PATH = MODEL_GITHUB_URL
 
 st.set_page_config(page_title="Airfoil Self-Noise Prediction", page_icon="🛩️", layout="wide")
 
@@ -42,7 +41,7 @@ set_custom_style()
 def load_model():
     try:
         headers = {"Authorization": f"token {st.secrets['github']['pat']}"}
-        response = requests.get(st.secrets["github"]["model_url"], headers=headers)
+        response = requests.get(MODEL_GITHUB_URL, headers=headers)
         response.raise_for_status()
         model = joblib.load(io.BytesIO(response.content))
         return model
@@ -63,7 +62,7 @@ def train_and_save_model(df):
     model.fit(X, y)
 
     # Save model
-    joblib.dump(model, MODEL_LOCAL_PATH)
+    #joblib.dump(model, MODEL_LOCAL_PATH)
     return model
 
 
