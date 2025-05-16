@@ -41,7 +41,7 @@ set_custom_style()
 def load_model():
     try:
         headers = {"Authorization": f"token {st.secrets['github']['pat']}"}
-        response = requests.get(MODEL_GITHUB_URL, headers=headers)
+        response = requests.get(MODEL_LOCAL_PATH, headers=headers)
         response.raise_for_status()
         model = joblib.load(io.BytesIO(response.content))
         return model
